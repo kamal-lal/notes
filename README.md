@@ -1,2 +1,1 @@
-# notes
-Study notes
+# Study Notes Collection
