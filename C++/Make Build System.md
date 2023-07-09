@@ -101,7 +101,7 @@ Shows the use of variables.
 
 ```makefile
 CC=g++
-OPT=O0
+OPT=-O0
 CFLAGS=-Wall -Werror -g $(OPT)
 
 .PHONY: all clean run
@@ -136,7 +136,7 @@ Rewriting above `Makefile` using automatic variables:
 
 ```makefile
 CC=g++
-OPT=O0
+OPT=-O0
 CFLAGS=-Wall -Werror -g $(OPT)
 
 .PHONY: all clean run
@@ -171,7 +171,7 @@ run:
 
 ```makefile
 CC=g++
-OPT=O0
+OPT=-O0
 CFLAGS=-Wall -Werror -g $(OPT)
 
 OBJ_FILES=main.o tools.o utilities.o
