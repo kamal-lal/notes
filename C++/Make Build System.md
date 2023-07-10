@@ -193,7 +193,24 @@ run:
     ./myapp
 ```
 
-## Functions
+## File Name Functions
+
+### 1. Find all files with certain extension
+
+Example:
+```makefile
+SRC_FILES=$(wildcard *.cpp)
+```
+
+### 2. Add Prefix
+
+Example:
+```makefile
+SRC_FILES=main.cpp file1.cpp file2.cpp
+SRC_FILES_WITH_PATH=$(addprefix src/,$(SRC_FILES))
+```
+
+## String Manipulation Functions
 
 ### 1. Pattern substitution
 
@@ -202,7 +219,7 @@ Basic format:
 $(patsubst pattern,replacement,text)
 ```
 
-An example:
+Example:
 ```makefile
 SRC_FILES=main.cpp file1.cpp file2.cpp
 OBJ_FILES=$(patsubst %.cpp, %.o, $(SRC_FILES))
@@ -216,12 +233,60 @@ SRC_FILES=main.cpp file1.cpp file2.cpp
 OBJ_FILES=$(SRC_FILES:.cpp=.o)
 ```
 
-### 2. Add Prefix
+## Other Functions
 
-Example:
+### 1. SHELL function
+
+Example: 
 ```makefile
-SRC_FILES=main.cpp file1.cpp file2.cpp
-SRC_FILES_WITH_PATH=$(addprefix src/,$(SRC_FILES))
+SRC_FILES=$(shell find *.cpp)
 ```
 
+### 2. FOREACH function
 
+Basic format: 
+```makefile
+$(foreach var,list,text)
+```
+
+The first two arguments, _var_ and _list_, are expanded before anything else is done; note that the last argument, _text_, is not expanded at the same time. Then for each word of the expanded value of _list_, the variable named by the expanded value of _var_ is set to that word, and _text_ is expanded.
+
+Example: 
+```makefile
+dirs := src1 src2 src3
+files := $(foreach dir,$(dirs),$(wildcard $(dir)/*))
+```
+
+## More realistic (manual) example - 3
+
+Putting functions to work.  
+Assuming all CPP source files and header files are in same folder.  
+Also the build process is done in same folder.
+
+```makefile
+CC=g++
+OPT=-O0
+CFLAGS=-Wall -Werror -g
+TARGET_BIN=myapp
+
+SRC_FILES=$(wildcard *.cpp)
+OBJ_FILES=$(patsubst %.cpp,%.o,$(SRC_FILES))
+# Or, written in shorthand format as:
+#    OBJ_FILES=$(SRC_FILES:.cpp=.o)
+
+.PHONY: all clean run
+
+all: $(TARGET_BIN)
+
+$(TARGET_BIN): $(OBJ_FILES)
+    g++ $^ -o $@
+
+%.o: %.cpp
+    g++ -c $(CFLAGS) $(OPT) $^ -o $@
+
+clean: 
+    rm -rf *.o $(TARGET_BIN)
+
+run:
+    ./$(TARGET_BIN)
+```
