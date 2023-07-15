@@ -147,13 +147,13 @@ myapp: main.o tools.o utilities.o
     g++ $^ -o $@
 
 main.o: main.cpp
-    g++ -c $(CFLAGS) $(OPT) $^ -o $@
+    g++ -c $(CFLAGS) $(OPT) $< -o $@
 
 tools.o: tools.cpp
-    g++ -c $(CFLAGS) $(OPT) $^ -o $@ 
+    g++ -c $(CFLAGS) $(OPT) $< -o $@ 
 
 utilities.o: utilities.cpp 
-    g++ -c $(CFLAGS) $(OPT) $^ -o $@
+    g++ -c $(CFLAGS) $(OPT) $< -o $@
 
 clean: 
     rm -rf *.o myapp
@@ -186,7 +186,7 @@ myapp: $(OBJ_FILES)
     g++ $^ -o $@
 
 %.o: %.cpp
-    g++ -c $(CFLAGS) $(OPT) $^ -o $@
+    g++ -c $(CFLAGS) $(OPT) $< -o $@
 
 clean: 
     rm -rf *.o myapp
@@ -284,7 +284,7 @@ $(TARGET_BIN): $(OBJ_FILES)
     g++ $^ -o $@
 
 %.o: %.cpp
-    g++ -c $(CFLAGS) $(OPT) $^ -o $@
+    g++ -c $(CFLAGS) $(OPT) $< -o $@
 
 clean: 
     rm -rf *.o $(TARGET_BIN)
@@ -320,8 +320,6 @@ SRC_FILES=$(wildcard *.cpp)
 OBJ_FILES=$(patsubst %.cpp,%.o,$(SRC_FILES))
 DEP_FILES=$(patsubst %.cpp,%.d,$(SRC_FILES))
 
--include $(DEP_FILES)
-
 .PHONY: all clean run
 
 all: $(TARGET_BIN)
@@ -330,11 +328,13 @@ $(TARGET_BIN): $(OBJ_FILES)
     g++ $^ -o $@
 
 %.o: %.cpp
-    g++ -c $(CFLAGS) $(OPT) $(DEPFLAGS) $^ -o $@
+    g++ -c $(CFLAGS) $(OPT) $(DEPFLAGS) $< -o $@
 
 clean: 
-    rm -rf *.o $(TARGET_BIN)
+    rm -rf *.o *.d $(TARGET_BIN)
 
 run:
     ./$(TARGET_BIN)
+
+-include $(DEP_FILES)
 ```
