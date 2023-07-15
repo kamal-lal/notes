@@ -3,7 +3,7 @@
 # Basics
 Command to create a executable binay from a C++ source file (eg. `main.cpp`):
 
-```
+```bash
 g++ main.cpp
 ```
 
@@ -11,13 +11,13 @@ This creates a binary file with name `a.out` (in Linux) or `a.exe` (in Windows).
 
 To create a output file (executable binary) with a specific name such as `myapp` (in Linux) or `myapp.exe` (in Windows):
 
-```
+```bash
 g++ main.cpp -o myapp
 ```
 
 If multiple C++ source files exists:
 
-```
+```bash
 g++ main.cpp file1.cpp file2.cpp -o myapp
 ```
 
@@ -41,7 +41,7 @@ The C/C++ compilation is a 4 step process:
 
 To make `g++` just do preprocessing and generate an output (usually with `.i` extension) use `-E` flag. 
 
-```
+```bash
 g++ -E main.cpp -o main.i
 ```
 
@@ -82,7 +82,7 @@ As an alternative, without modifying the source file, the value of macro can be 
 
 Above code along with below command gives same result
 
-```
+```bash
 g++ main.cpp -DLOGGING=0 -o myapp
 ```
 
@@ -103,7 +103,7 @@ int sum(int, int);
 
 To stop `g++` at the _'compilation'_ step and generate an output (usually with `.s` extension) use `-S` flag. 
 
-```
+```bash
 g++ -S main.cpp -o main.s
 g++ -S file1.cpp -o file1.s
 g++ -S file2.cpp -o file2.s
@@ -117,7 +117,7 @@ g++ -S file2.cpp -o file2.s
 
 To stop `g++` at the _'assembly'_ step and generate an output (with `.o` (Linux) or `.obj` (Windows) extension) use `-c` flag. 
 
-```
+```bash
 g++ -c main.cpp -o main.o
 g++ -c file1.cpp -o file1.o
 g++ -c file2.cpp -o file2.o
@@ -130,57 +130,57 @@ Object files could be distriuted and re-used. Libraries are usually done this wa
 - No separate flags, just `g++`. (can accept any of the earlier intermediate files as input)
 
 (TODO: Library creation and Linking library)
-```
+```bash
 g++ main.o file1.o file2.o -o myapp
 ```
 
 Or
 
-```
+```bash
 g++ main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 # Common `g++` flags
 
 - Save all intermediate files
-```
+```bash
 g++ -save-temps main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 - Looking for header files in folders (eg. MyHeaders) other than 'default' ones. Also known as 'include' folders. 
-```
+```bash
 g++ -IMyHeaders main.cpp file1.cpp file2.cpp -o myapp
 ```
 Compiler knows systems default Include folder (eg. `/usr/include` in Linux). Also the 'current directory' is present by default (`-I.`). 
 
 - Show all warnings
-```
+```bash
 g++ -Wall main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 - Convert warnings into errors (compilation fails)
-```
+```bash
 g++ -Wall -Werror main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 - Get verbose output during compilation
-```
+```bash
 g++ -v main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 - Set required C++ standard
-```
+```bash
 g++ -std=c++20 main.cpp file1.cpp file2.cpp -o myapp
 ```
 Other options include `-std=c++98`, `-std=c++03`, `-std=c++11`, `-std=c++14`, `-std=c++17`, `-std=c++23` etc. 
 
 - Produce output with debugging symbols in it.
-```
+```bash
 g++ -g main.cpp file1.cpp file2.cpp -o myapp
 ```
 
 - Produce output with high optimisation
-```
+```bash
 g++ -O3 main.cpp file1.cpp file2.cpp -o myapp
 ```
 Other optimisation flags:
@@ -196,3 +196,10 @@ Other optimisation flags:
 '`-Og`' - Optimise for debugging
 
 '`-Os`' - Optimised for size
+
+- Generate dependency files that can be used for the build system
+```bash
+g++ -MMD main.cpp file1.cpp file2.cpp -o myapp
+```
+
+Other dependency flags to explore - `-MP`, `-MF`, `-MT` etc. 

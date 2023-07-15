@@ -1,6 +1,6 @@
 # **The MAKE Build System**
 
-# Basics
+# MAKE Basics
 - The commands are written in a file named `Makefile`. 
 - Easy to relate with 'Baking' process. 
 
@@ -34,8 +34,8 @@ Alternatively, we can explicitly ask `make` to build a target.
 $ make myapp
 ```
 
-## More realistic (manual) example - 1
-Consider a C++ project having multiple source files and header files. 
+## Example - 1 (Basic)
+Consider a C++ project having multiple source files. 
 
 - `main.cpp`
 - `tools.cpp`
@@ -95,7 +95,7 @@ $ make clean
 
 Note: The `all`, `clean`, `run` are usual naming conventions for this purpose. 
 
-## More realistic (manual) example - 2
+## Example - 2 (Editing made easy with Variables)
 
 Shows the use of variables.
 
@@ -162,7 +162,9 @@ run:
     ./myapp
 ```
 
-## Patterns
+## Example - 3 (Avoiding repetition)
+
+### Patterns
 
 - A pattern rule contains the character '`%`'
 - The target is a pattern for matching file names
@@ -193,7 +195,7 @@ run:
     ./myapp
 ```
 
-## File Name Functions
+## More MAKE concepts - File Name Functions
 
 ### 1. Find all files with certain extension
 
@@ -210,7 +212,7 @@ SRC_FILES=main.cpp file1.cpp file2.cpp
 SRC_FILES_WITH_PATH=$(addprefix src/,$(SRC_FILES))
 ```
 
-## String Manipulation Functions
+## More MAKE concepts - String Manipulation Functions
 
 ### 1. Pattern substitution
 
@@ -233,7 +235,7 @@ SRC_FILES=main.cpp file1.cpp file2.cpp
 OBJ_FILES=$(SRC_FILES:.cpp=.o)
 ```
 
-## Other Functions
+## More MAKE concepts - Other Functions
 
 ### 1. SHELL function
 
@@ -257,7 +259,7 @@ dirs := src1 src2 src3
 files := $(foreach dir,$(dirs),$(wildcard $(dir)/*))
 ```
 
-## More realistic (manual) example - 3
+## Example - 4 (With automatic files detection)
 
 Putting functions to work.  
 Assuming all CPP source files and header files are in same folder.  
@@ -283,6 +285,52 @@ $(TARGET_BIN): $(OBJ_FILES)
 
 %.o: %.cpp
     g++ -c $(CFLAGS) $(OPT) $^ -o $@
+
+clean: 
+    rm -rf *.o $(TARGET_BIN)
+
+run:
+    ./$(TARGET_BIN)
+```
+
+## Example - 5 (Project with Header files)
+
+All earlier examples were considering multiple C++ source files. But in any C++ projects, header files will also be present. Now consider C++ project having following files:
+
+- `main.cpp`
+- `tools.cpp`
+- `utilities.cpp`
+- `tools.h`
+- `utilities.h`
+- `constants.h`
+
+Assume that multiple header files are also incuded in differnt source files (in any order).  
+Usually, we recopile a source file if the file itself is changed (timestamp updated). However, now we must recompile the source files if any header files included in it is changed.  
+
+To do this, we can leverage the `g++` flags that can generate dependency files and use those files in the `make` process. 
+
+```makefile
+CC=g++
+OPT=-O0
+CFLAGS=-Wall -Werror -g
+DEPFLAGS=-MMD
+TARGET_BIN=myapp
+
+SRC_FILES=$(wildcard *.cpp)
+OBJ_FILES=$(patsubst %.cpp,%.o,$(SRC_FILES))
+DEP_FILES=$(patsubst %.cpp,%.d,$(SRC_FILES))
+
+-include $(DEP_FILES)
+
+.PHONY: all clean run
+
+all: $(TARGET_BIN)
+
+$(TARGET_BIN): $(OBJ_FILES)
+    g++ $^ -o $@
+
+%.o: %.cpp
+    g++ -c $(CFLAGS) $(OPT) $(DEPFLAGS) $^ -o $@
 
 clean: 
     rm -rf *.o $(TARGET_BIN)
