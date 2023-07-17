@@ -338,3 +338,212 @@ run:
 
 -include $(DEP_FILES)
 ```
+
+## Example - 6 (Project with structured sub-folders)
+
+```
+# ~~~~ Folder Before ~~~~ #
+- project root
+  	|- inc/
+  	|	|- header1.h
+  	|	|- header2.h
+  	|	  ....
+  	|- src/
+  	|	|- source1.cpp
+  	|	|- source2.cpp
+  	|	  ....
+  	|- Makefile
+
+
+# ~~~~ Folder After ~~~~ #
+- project root
+  	|- obj/
+  	|	|- obj1.o 
+  	|	|- obj1.d
+  	|	|- obj2.o 
+  	|	|- obj2.d
+  	|	  ....
+  	|- inc/
+  	|	|- header1.h
+  	|	|- header2.h
+  	|	  ....
+  	|- src/
+  	|	|- source1.cpp
+  	|	|- source2.cpp
+  	|	  ....
+  	|- Makefile
+  	|- myapp
+```
+
+Makefile for this folder structure:
+
+```makefile
+# Compiler and flags
+CC       := g++
+OPT      := -O0 -g
+CFLAGS   := -Wall -Werror
+DEPFLAGS := -MMD
+
+# Folders
+SRCDIR := src
+INCDIR := inc
+OBJDIR := obj
+
+# Executable binary
+TARGET := myapp
+
+# File names
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+OBJECTS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SOURCES))
+DEPS    := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.d, $(SOURCES))
+
+# Default target
+all: $(TARGET)
+
+# Build target
+$(TARGET): $(OBJECTS)
+	g++ $^ -o $@
+
+# Compile source files
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
+	g++ -c $(CFLAGS) $(OPT) $(DEPFLAGS) -I$(INCDIR) $< -o $@
+
+# Misc phony targets
+clean: 
+	rm -rf $(TARGET) $(OBJDIR)
+
+run:
+	./$(TARGET)
+
+# Include dependency files
+-include $(DEPS)
+
+.PHONY: all clean run
+```
+
+## Example - 7 (Project with structured sub-folders and multiple builds)
+
+```
+# ~~~~ Folder Before ~~~~ #
+- project root
+ 	|- inc/
+ 	|	|- header1.h
+ 	|	|- header2.h
+ 	|	  ....
+ 	|- src/
+ 	|	|- source1.cpp
+ 	|	|- source2.cpp
+ 	|	  ....
+ 	|- Makefile
+
+
+# ~~~~ Folder After ~~~~ #
+- project root
+ 	|- bin/
+ 	|	|- debug/
+ 	|	|	|- myapp
+ 	|	|- release/
+ 	|	|	|- myapp
+ 	|- obj/
+ 	|	|- debug/
+ 	|	|	|- objd1.o
+ 	|	|	|- objd1.d
+ 	|	|	|- objd2.o
+ 	|	|	|- objd2.d
+ 	|	|	  ....
+ 	|	|- release/
+ 	|	|	|- objr1.o
+ 	|	|	|- objr1.d
+ 	|	|	|- objr2.o
+ 	|	|	|- objr2.d
+ 	|	|	  ....
+ 	|- inc/
+ 	|	|- header1.h
+ 	|	|- header2.h
+ 	|	  ....
+ 	|- src/
+ 	|	|- source1.cpp
+ 	|	|- source2.cpp
+ 	|	  ....
+ 	|- Makefile
+```
+
+Makefile for this purpose:
+
+```makefile
+# Compiler and flags
+CC            := g++
+DEPFLAGS      := -MMD
+CLAGS         := -Wall -Werror
+DEBUG_FLAGS   := -O0 -g -DDEBUG
+RELEASE_FLAGS := -O2 -DNDEBUG
+
+# Folders
+SRCDIR         := src
+INCDIR         := inc
+OBJDIR         := obj
+BINDIR         := bin
+DEBUG_OBJDIR   := $(OBJDIR)/debug
+DEBUG_BINDIR   := $(BINDIR)/debug
+RELEASE_OBJDIR := $(OBJDIR)/release
+RELEASE_BINDIR := $(BINDIR)/release
+
+# Executable binaries
+DEBUG_TARGET   := $(DEBUG_BINDIR)/myapp
+RELEASE_TARGET := $(RELEASE_BINDIR)/myapp
+
+# File names
+SOURCES      := $(wildcard $(SRCDIR)/*.cpp)
+DEBUG_OBJS   := $(patsubst $(SRCDIR)/%.cpp, $(DEBUG_OBJDIR)/%.o, $(SOURCES))
+DEBUG_DEPS   := $(patsubst %.o, %.d, $(DEBUG_OBJS))
+RELEASE_OBJS := $(patsubst $(SRCDIR)/%.cpp, $(RELEASE_OBJDIR)/%.o, $(SOURCES))
+RELEASE_DEPS := $(patsubst %.o, %.d, $(RELEASE_OBJS))
+
+# Default target
+debug: $(DEBUG_TARGET)
+
+release: $(RELEASE_TARGET)
+
+all: debug release
+
+# Build debug target
+$(DEBUG_TARGET): $(DEBUG_OBJS)
+	@mkdir -p $(DEBUG_BINDIR)
+	g++ $^ -o $@
+
+# Compile source files (into debug objs)
+$(DEBUG_OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(DEBUG_OBJDIR)
+	g++ -c $(CFLAGS) -I$(INCDIR) $(DEPFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+# Build release target
+$(RELEASE_TARGET): $(RELEASE_OBJS)
+	@mkdir -p $(RELEASE_BINDIR)
+	g++ $^ -o $@
+
+# Compile source files (into release objs)
+$(RELEASE_OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(RELEASE_OBJDIR)
+	g++ -c $(CFLAGS) -I$(INCDIR) $(DEPFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+# Misc phony targets
+clean:
+	rm -rf $(DEBUG_TARGET) $(DEBUG_OBJDIR)/*
+	rm -rf $(RELEASE_TARGET) $(RELEASE_OBJDIR)/*
+
+cleanall: 
+	rm -rf $(BINDIR) $(OBJDIR)
+
+rundebug:
+	./$(DEBUG_TARGET)
+
+runrelease:
+	./$(RELEASE_TARGET)
+
+# Include dependency files
+-include $(DEBUG_DEPS)
+-include $(RELEASE_DEPS)
+
+.PHONY: all clean cleanall rundebug runrelease debug release
+```
