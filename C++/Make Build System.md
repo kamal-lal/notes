@@ -100,9 +100,9 @@ Note: The `all`, `clean`, `run` are usual naming conventions for this purpose.
 Shows the use of variables.
 
 ```makefile
-CC=g++
-OPT=-O0
-CFLAGS=-Wall -Werror -g $(OPT)
+CXX    := g++
+OPT    := -O0
+CFLAGS := -Wall -Werror -g $(OPT)
 
 .PHONY: all clean run
 
@@ -112,13 +112,13 @@ myapp: main.o tools.o utilities.o
     g++ main.o tools.o utilities.o -o myapp
 
 main.o: main.cpp
-    g++ -c $(CFLAGS) $(OPT) main.cpp -o main.o
+    g++ -c $(CFLAGS) main.cpp -o main.o
 
 tools.o: tools.cpp
-    g++ -c $(CFLAGS) $(OPT) tools.cpp -o tools.o
+    g++ -c $(CFLAGS) tools.cpp -o tools.o
 
 utilities.o: utilities.cpp
-    g++ -c $(CFLAGS) $(OPT) utilities.cpp -o utilities.o
+    g++ -c $(CFLAGS) utilities.cpp -o utilities.o
 
 clean: 
     rm -rf *.o myapp
@@ -135,9 +135,9 @@ Some special variables (Automatic variables):
 Rewriting above `Makefile` using automatic variables:
 
 ```makefile
-CC=g++
-OPT=-O0
-CFLAGS=-Wall -Werror -g $(OPT)
+CXX    := g++
+OPT    := -O0
+CFLAGS := -Wall -Werror -g $(OPT)
 
 .PHONY: all clean run
 
@@ -147,13 +147,13 @@ myapp: main.o tools.o utilities.o
     g++ $^ -o $@
 
 main.o: main.cpp
-    g++ -c $(CFLAGS) $(OPT) $< -o $@
+    g++ -c $(CFLAGS) $< -o $@
 
 tools.o: tools.cpp
-    g++ -c $(CFLAGS) $(OPT) $< -o $@ 
+    g++ -c $(CFLAGS) $< -o $@ 
 
 utilities.o: utilities.cpp 
-    g++ -c $(CFLAGS) $(OPT) $< -o $@
+    g++ -c $(CFLAGS) $< -o $@
 
 clean: 
     rm -rf *.o myapp
@@ -172,21 +172,21 @@ run:
 - '`%`' in a prerequisite of a pattern rule stands for the same stem that was matched by the '`%`' in the target. 
 
 ```makefile
-CC=g++
-OPT=-O0
-CFLAGS=-Wall -Werror -g $(OPT)
+CXX    := g++
+OPT    := -O0
+CFLAGS := -Wall -Werror -g $(OPT)
 
-OBJ_FILES=main.o tools.o utilities.o
+OBJECTS := main.o tools.o utilities.o
 
 .PHONY: all clean run
 
 all: myapp
 
-myapp: $(OBJ_FILES)
+myapp: $(OBJECTS)
     g++ $^ -o $@
 
 %.o: %.cpp
-    g++ -c $(CFLAGS) $(OPT) $< -o $@
+    g++ -c $(CFLAGS) $< -o $@
 
 clean: 
     rm -rf *.o myapp
@@ -201,15 +201,15 @@ run:
 
 Example:
 ```makefile
-SRC_FILES=$(wildcard *.cpp)
+SOURCES := $(wildcard *.cpp)
 ```
 
 ### 2. Add Prefix
 
 Example:
 ```makefile
-SRC_FILES=main.cpp file1.cpp file2.cpp
-SRC_FILES_WITH_PATH=$(addprefix src/,$(SRC_FILES))
+SOURCES := main.cpp file1.cpp file2.cpp
+SOURCES_WITH_PATH := $(addprefix src/, $(SOURCES))
 ```
 
 ## More MAKE concepts - String Manipulation Functions
@@ -218,21 +218,21 @@ SRC_FILES_WITH_PATH=$(addprefix src/,$(SRC_FILES))
 
 Basic format: 
 ```makefile
-$(patsubst pattern,replacement,text)
+$(patsubst pattern, replacement, text)
 ```
 
 Example:
 ```makefile
-SRC_FILES=main.cpp file1.cpp file2.cpp
-OBJ_FILES=$(patsubst %.cpp, %.o, $(SRC_FILES))
+SOURCES := main.cpp file1.cpp file2.cpp
+OBJECTS := $(patsubst %.cpp, %.o, $(SOURCES))
 ```
 
 Shorthand format: `$(var:pattern=replacement)`
 
 Example:
 ```makefile
-SRC_FILES=main.cpp file1.cpp file2.cpp
-OBJ_FILES=$(SRC_FILES:.cpp=.o)
+SOURCES := main.cpp file1.cpp file2.cpp
+OBJECTS := $(SOURCES:.cpp=.o)
 ```
 
 ## More MAKE concepts - Other Functions
@@ -241,7 +241,7 @@ OBJ_FILES=$(SRC_FILES:.cpp=.o)
 
 Example: 
 ```makefile
-SRC_FILES=$(shell find *.cpp)
+SOURCES := $(shell find *.cpp)
 ```
 
 ### 2. FOREACH function
@@ -255,8 +255,8 @@ The first two arguments, _var_ and _list_, are expanded before anything else is 
 
 Example: 
 ```makefile
-dirs := src1 src2 src3
-files := $(foreach dir,$(dirs),$(wildcard $(dir)/*))
+dirs  := src1 src2 src3
+files := $(foreach dir, $(dirs), $(wildcard $(dir)/*))
 ```
 
 ## Example - 4 (With automatic files detection)
@@ -266,31 +266,32 @@ Assuming all CPP source files and header files are in same folder.
 Also the build process is done in same folder.
 
 ```makefile
-CC=g++
-OPT=-O0
-CFLAGS=-Wall -Werror -g
-TARGET_BIN=myapp
+CXX    := g++
+OPT    := -O0
+CFLAGS := -Wall -Werror -g
+TARGET := myapp
 
-SRC_FILES=$(wildcard *.cpp)
-OBJ_FILES=$(patsubst %.cpp,%.o,$(SRC_FILES))
+SOURCES := $(wildcard *.cpp)
+OBJECTS := $(patsubst %.cpp,%.o,$(SOURCES))
+
 # Or, written in shorthand format as:
-#    OBJ_FILES=$(SRC_FILES:.cpp=.o)
+#    OBJECTS := $(SOURCES:.cpp=.o)
 
 .PHONY: all clean run
 
-all: $(TARGET_BIN)
+all: $(TARGET)
 
-$(TARGET_BIN): $(OBJ_FILES)
+$(TARGET): $(OBJECTS)
     g++ $^ -o $@
 
 %.o: %.cpp
     g++ -c $(CFLAGS) $(OPT) $< -o $@
 
 clean: 
-    rm -rf *.o $(TARGET_BIN)
+    rm -rf *.o $(TARGET)
 
 run:
-    ./$(TARGET_BIN)
+    ./$(TARGET)
 ```
 
 ## Example - 5 (Project with Header files)
@@ -310,33 +311,33 @@ Usually, we recopile a source file if the file itself is changed (timestamp upda
 To do this, we can leverage the `g++` flags that can generate dependency files and use those files in the `make` process. 
 
 ```makefile
-CC=g++
-OPT=-O0
-CFLAGS=-Wall -Werror -g
-DEPFLAGS=-MMD
-TARGET_BIN=myapp
+CXX      := g++
+OPT      := -O0
+CFLAGS   := -Wall -Werror -g
+DEPFLAGS := -MMD
+TARGET   := myapp
 
-SRC_FILES=$(wildcard *.cpp)
-OBJ_FILES=$(patsubst %.cpp,%.o,$(SRC_FILES))
-DEP_FILES=$(patsubst %.cpp,%.d,$(SRC_FILES))
+SOURCES := $(wildcard *.cpp)
+OBJECTS := $(patsubst %.cpp, %.o, $(SOURCES))
+DEPS    := $(patsubst %.cpp, %.d, $(SOURCES))
 
 .PHONY: all clean run
 
-all: $(TARGET_BIN)
+all: $(TARGET)
 
-$(TARGET_BIN): $(OBJ_FILES)
+$(TARGET): $(OBJECTS)
     g++ $^ -o $@
 
 %.o: %.cpp
     g++ -c $(CFLAGS) $(OPT) $(DEPFLAGS) $< -o $@
 
 clean: 
-    rm -rf *.o *.d $(TARGET_BIN)
+    rm -rf *.o *.d $(TARGET)
 
 run:
-    ./$(TARGET_BIN)
+    ./$(TARGET)
 
--include $(DEP_FILES)
+-include $(DEPS)
 ```
 
 ## Example - 6 (Project with structured sub-folders)
@@ -379,7 +380,7 @@ Makefile for this folder structure:
 
 ```makefile
 # Compiler and flags
-CC       := g++
+CXX      := g++
 OPT      := -O0 -g
 CFLAGS   := -Wall -Werror
 DEPFLAGS := -MMD
@@ -473,7 +474,7 @@ Makefile for this purpose:
 
 ```makefile
 # Compiler and flags
-CC            := g++
+CXX           := g++
 DEPFLAGS      := -MMD
 CLAGS         := -Wall -Werror
 DEBUG_FLAGS   := -O0 -g -DDEBUG
